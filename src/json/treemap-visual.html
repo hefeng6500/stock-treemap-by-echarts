@@ -1,0 +1,174 @@
+<!--
+	THIS EXAMPLE WAS DOWNLOADED FROM https://echarts.apache.org/examples/en/editor.html?c=treemap-visual
+-->
+<!DOCTYPE html>
+<html lang="en" style="height: 100%">
+<head>
+  <meta charset="utf-8">
+</head>
+<body style="height: 100%; margin: 0">
+  <div id="container" style="height: 100%"></div>
+
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/jquery"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.3.3/dist/echarts.min.js"></script>
+  <!-- Uncomment this line if you want to dataTool extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.3.3/dist/extension/dataTool.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use gl extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to echarts-stat extension
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts-stat@latest/dist/ecStat.min.js"></script>
+  -->
+  <!-- Uncomment this line if you want to use map
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/china.js"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@4.9.0/map/js/world.js"></script>
+  -->
+  <!-- Uncomment these two lines if you want to use bmap extension
+  <script type="text/javascript" src="https://api.map.baidu.com/api?v=3.0&ak=YOUR_API_KEY"></script>
+  <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.3.3/dist/extension/bmap.min.js"></script>
+  -->
+
+  <script type="text/javascript">
+    var dom = document.getElementById('container');
+    var myChart = echarts.init(dom, null, {
+      renderer: 'canvas',
+      useDirtyRect: false
+    });
+    var app = {};
+    var ROOT_PATH = 'https://echarts.apache.org/examples';
+    var option;
+
+    myChart.showLoading();
+const household_america_2012 = 113616229;
+$.get(
+  ROOT_PATH + '/data/asset/data/obama_budget_proposal_2012.json',
+  function (obama_budget_2012) {
+    myChart.hideLoading();
+    const visualMin = -100;
+    const visualMax = 100;
+    const visualMinBound = -40;
+    const visualMaxBound = 40;
+    convertData(obama_budget_2012);
+    function convertData(originList) {
+      let min = Infinity;
+      let max = -Infinity;
+      for (let i = 0; i < originList.length; i++) {
+        let node = originList[i];
+        if (node) {
+          let value = node.value;
+          value[2] != null && value[2] < min && (min = value[2]);
+          value[2] != null && value[2] > max && (max = value[2]);
+        }
+      }
+      for (let i = 0; i < originList.length; i++) {
+        let node = originList[i];
+        if (node) {
+          let value = node.value;
+          // Scale value for visual effect
+          if (value[2] != null && value[2] > 0) {
+            value[3] = echarts.number.linearMap(
+              value[2],
+              [0, max],
+              [visualMaxBound, visualMax],
+              true
+            );
+          } else if (value[2] != null && value[2] < 0) {
+            value[3] = echarts.number.linearMap(
+              value[2],
+              [min, 0],
+              [visualMin, visualMinBound],
+              true
+            );
+          } else {
+            value[3] = 0;
+          }
+          if (!isFinite(value[3])) {
+            value[3] = 0;
+          }
+          if (node.children) {
+            convertData(node.children);
+          }
+        }
+      }
+    }
+    function isValidNumber(num) {
+      return num != null && isFinite(num);
+    }
+    myChart.setOption(
+      (option = {
+        title: {
+          left: 'center',
+          text: 'Gradient Mapping',
+          subtext: 'Growth > 0: green; Growth < 0: red; Growth = 0: grey'
+        },
+        tooltip: {
+          formatter: function (info) {
+            let value = info.value;
+            let amount = value[0];
+            amount = isValidNumber(amount)
+              ? echarts.format.addCommas(amount * 1000) + '$'
+              : '-';
+            let amount2011 = value[1];
+            amount2011 = isValidNumber(amount2011)
+              ? echarts.format.addCommas(amount2011 * 1000) + '$'
+              : '-';
+            let change = value[2];
+            change = isValidNumber(change) ? change.toFixed(2) + '%' : '-';
+            return [
+              '<div class="tooltip-title">' +
+                echarts.format.encodeHTML(info.name) +
+                '</div>',
+              '2012 Amount: &nbsp;&nbsp;' + amount + '<br>',
+              '2011 Amount: &nbsp;&nbsp;' + amount2011 + '<br>',
+              'Change From 2011: &nbsp;&nbsp;' + change
+            ].join('');
+          }
+        },
+        series: [
+          {
+            name: 'ALL',
+            top: 80,
+            type: 'treemap',
+            label: {
+              show: true,
+              formatter: '{b}'
+            },
+            itemStyle: {
+              borderColor: 'black'
+            },
+            visualMin: visualMin,
+            visualMax: visualMax,
+            visualDimension: 3,
+            levels: [
+              {
+                itemStyle: {
+                  borderWidth: 3,
+                  borderColor: '#333',
+                  gapWidth: 3
+                }
+              },
+              {
+                color: ['#942e38', '#aaa', '#269f3c'],
+                colorMappingBy: 'value',
+                itemStyle: {
+                  gapWidth: 1
+                }
+              }
+            ],
+            data: obama_budget_2012
+          }
+        ]
+      })
+    );
+  }
+);
+
+    if (option && typeof option === 'object') {
+      myChart.setOption(option);
+    }
+
+    window.addEventListener('resize', myChart.resize);
+  </script>
+</body>
+</html>
