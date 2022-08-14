@@ -140,7 +140,7 @@ export function getColorChunk(value) {
   }
 
   const [integerValue, decimalValue] = value.toString().split(".");
-  const precent = parseFloat(parseFloat(`0.${decimalValue}`).toFixed(2));
+  const precent = parseFloat(parseFloat(`0.${decimalValue}`)?.toFixed(2)) || 0;
 
   return {
     chunk: map[integerValue] || [],

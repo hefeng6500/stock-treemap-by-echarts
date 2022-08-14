@@ -51,8 +51,10 @@ export default {
               treePath.push(treePathInfo[i].name);
             }
 
-            const newValue = echarts.format.addCommas(value[0].toFixed(2));
-            let riseAndFall = echarts.format.addCommas(value[1].toFixed(2));
+            const newValue =
+              echarts.format.addCommas(value[0]?.toFixed(2)) || 0;
+            let riseAndFall =
+              echarts.format.addCommas(value[1]?.toFixed(2)) || 0;
 
             riseAndFall = formatNumberToString(riseAndFall);
 
