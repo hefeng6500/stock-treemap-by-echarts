@@ -150,7 +150,7 @@ export function getColorChunk(value) {
 
 // 为数字添加正负号
 export function formatNumberToString(value) {
-  if (!value || /[+-]/.test(value)) {
+  if (!parseInt(value) || /[+-]/.test(value)) {
     return value.toString();
   }
 
